@@ -4,9 +4,16 @@
  * @author Michael Zhang | michaelji520@gmail.com
  * @version 1.0 | 2019-06-20 | initial version
  */
-var { GraphQLID, GraphQLString, GraphQLInt, GraphQLList, GraphQLSchema, GraphQLObjectType } = require('graphql');
+
+var { GraphQLID,
+      GraphQLString,
+      GraphQLInt,
+      GraphQLList,
+      GraphQLSchema,
+      GraphQLObjectType,
+      GraphQLNonNull } = require('graphql');
+
 var db = require('./mysql_crud.js');
-const { directors, movies } = require('./database.js');
 
 var userType = new GraphQLObjectType({
   name: 'user',
@@ -22,64 +29,97 @@ var userType = new GraphQLObjectType({
   }
 });
 
-var movieType = new GraphQLObjectType({
-  name: 'Movie',
-  fields: {
-    id: { type: GraphQLID},
-    name: { type: GraphQLString },
-    year: { type: GraphQLID},
-    directorId: { type: GraphQLID}
-  }
-});
-
-var directorType = new GraphQLObjectType({
-  name: 'Director',
-  fields: {
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    age: { type: GraphQLID },
-    movies: {
-      type: new GraphQLList(movieType),
-      resolve(source, args) {
-        return movies.filter(movie => { return movie.directorId === source.id; });
-      }
-    }
-  }
-});
-
 var queryType = new GraphQLObjectType({
   name: 'Query',
+  description: 'Query user record',
   fields: {
     user: {
       type: GraphQLList(userType),
       args: {
-        user_id: { type: GraphQLInt }
+        user_id: { type: GraphQLInt },
+        user_name: { type: GraphQLString },
+        user_role: { type: GraphQLInt }
       },
       resolve: async function (source, args) {
-        const result = await db.query(`select * from tbl_user where user_id=${args.user_id}`);
+        console.log(args);
+        const result = await db.retrieve('tbl_user', args, {});
         return result;
-      }
-    },
-    movie: {
-      type: movieType,
-      args: {
-        id: { type: GraphQLInt }
-      },
-      resolve: async function (source, args) {
-        return movies.find(movie => { return movie.id === args.id });
-      }
-    },
-    director: {
-      type: directorType,
-      args: {
-        id: { type: GraphQLInt}
-      },
-      resolve: function (source, args) {
-        return directors.find(director => { return director.id === args.id });
       }
     }
   }
 });
 
-module.exports = new GraphQLSchema({ query: queryType });
+var mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  description: 'Create, delete, update user record',
+  fields: {
+    createUser: {
+      type: userType,
+      args: {
+        user_id: { type: GraphQLInt },
+        user_name: { type: new GraphQLNonNull(GraphQLString) },
+        user_password: { type: new GraphQLNonNull(GraphQLString) },
+        user_role: { type: new GraphQLNonNull(GraphQLInt) },
+        // is_delete: { type: new GraphQLNonNull(GraphQLInt) },
+        // create_time: { type: new GraphQLNonNull(GraphQLString) },
+        // update_time: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async function (source, args) {
+        if (args.user_id && (args.user_id !== 0)) {
+          // const res = await db.update('tbl_user', args, { user_id: args.user_id });
+          console.log('User id is not empty!');
+        } else {
+          const res = await db.create('tbl_user', args);
+          console.log(res);
+        }
+        return args;
+      }
+    },
+    updateUser: {
+      type: userType,
+      args: {
+        user_id: { type: GraphQLInt },
+        user_name: { type: new GraphQLNonNull(GraphQLString) },
+        user_password: { type: new GraphQLNonNull(GraphQLString) },
+        user_role: { type: new GraphQLNonNull(GraphQLInt) },
+        // is_delete: { type: new GraphQLNonNull(GraphQLInt) },
+        // create_time: { type: new GraphQLNonNull(GraphQLString) },
+        // update_time: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async function (source, args) {
+        if (args.user_id && (args.user_id !== 0)) {
+          const res = await db.update('tbl_user', args, { user_id: args.user_id });
+          console.log(res.message, res);
+        } else {
+          // const res = await db.create('tbl_user', args);
+          console.log('User id is empty!');
+        }
+        return args;
+      }
+    },
+    deleteUser: {
+      type: userType,
+      args: {
+        user_id: { type: GraphQLInt },
+        user_name: { type: new GraphQLNonNull(GraphQLString) },
+        user_password: { type: new GraphQLNonNull(GraphQLString) },
+        user_role: { type: new GraphQLNonNull(GraphQLInt) },
+        // is_delete: { type: new GraphQLNonNull(GraphQLInt) },
+        // create_time: { type: new GraphQLNonNull(GraphQLString) },
+        // update_time: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async function (source, args) {
+        if (args.user_id && (args.user_id !== 0)) {
+          const res = await db.remove('tbl_user', args);
+          console.log(res.message, res);
+        } else {
+          console.log('User id is empty!');
+        }
+        return args;
+      }
+    }
+  }
+});
+
+module.exports = new GraphQLSchema({ query: queryType, mutation: mutationType });
 
