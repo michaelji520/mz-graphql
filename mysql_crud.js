@@ -8,6 +8,10 @@
 var mysql = require('mysql');
 var db_config = require('./db_config.js');
 
+if (!db_config) {
+  console.log('Missing DB config file: db_config.js');
+}
+
 var connection = mysql.createConnection(db_config);
 
 // connect database
