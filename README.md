@@ -11,7 +11,6 @@ module.exports = {
   port: '3306',
   database: 'graphql'
 };
-
 `
 
 
