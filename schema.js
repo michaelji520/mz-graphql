@@ -15,6 +15,18 @@ var { GraphQLID,
 
 var db = require('./mysql_crud.js');
 
+var pictureType = new GraphQLObjectType({
+  name: 'picture',
+  fields: {
+    id: { type: GraphQLID },
+    user_id: { type: GraphQLInt },
+    url: { type: GraphQLString },
+    is_delete: { type: GraphQLInt },
+    create_time: { type: GraphQLString },
+    update_time: { type: GraphQLString }
+  }
+});
+
 var userType = new GraphQLObjectType({
   name: 'user',
   fields: {
@@ -26,8 +38,15 @@ var userType = new GraphQLObjectType({
     is_delete: { type: GraphQLInt },
     create_time: { type: GraphQLString },
     update_time: { type: GraphQLString },
+    pictures: {
+      type: new GraphQLList(pictureType),
+      resolve: async function (source, args) {
+        return await db.retrieve('tbl_picture', {user_id: source.user_id});
+      }
+    },
   }
 });
+
 
 var queryType = new GraphQLObjectType({
   name: 'Query',
