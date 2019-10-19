@@ -1,16 +1,9 @@
 GraphQL实战
 ===========
 
-You need to create a file named `db_config.js` like 
-
+1. initialize db config file with given tempalte.
 ```
-module.exports = {
-  host: 'localhost',
-  user: 'username',
-  password: 'password',
-  port: '3306',
-  database: 'graphql'
-};
+$ mv db_default.js db_config.js
 ```
 
 

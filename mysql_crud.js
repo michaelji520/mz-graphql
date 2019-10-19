@@ -1,11 +1,12 @@
 /**
  * Copyright (c) 2014-2018 NighthawkStudio, All rights reserved.
- * @fileoverview
+ * @fileoverview mysql create, retrieve, update, delete
  * @author Michael Zhang | michaelji520@gmail.com
  * @version 1.0 | 2019-06-20 | initial version
  */
 
 var mysql = require('mysql');
+// import database connection config
 var db_config = require('./db_config.js');
 
 if (!db_config) {
@@ -26,12 +27,12 @@ connection.connect(function (err) {
 /**
  * @method: query
  * @description: execute query sql
- * @param {sql}: sql statement
- * @return result/error
+ * @param {string} sql statement
+ * @return {Promise} result/error
  **/
 function query(sql) {
   return new Promise((resolve, reject) => {
-    connection.query(sql, function (err, result) {
+      connection.query(sql, function (err, result) {
       if(err){
         reject(err);
         return;
