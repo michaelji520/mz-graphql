@@ -12,17 +12,23 @@ var db_config = require('./db_config.js');
 if (!db_config) {
   console.log('Missing DB config file: db_config.js');
 }
-
-var connection = mysql.createConnection(db_config);
+// create single db connection
+// var connection = mysql.createConnection(db_config);
 
 // connect database
-connection.connect(function (err) {
-  if (err) {
-    console.error('error connecting: ' + err.stack);
-    return;
-  }
-  console.log('mysql connected as id ' + connection.threadId);
-});
+// connection.connect(function (err) {
+//   if (err) {
+//     console.error('error connecting: ' + err.stack);
+//     return;
+//   }
+//   console.log('mysql connected as id ' + connection.threadId);
+// });
+
+
+// create connection pool
+var connection = mysql. createPool(Object.assign(db_config, {
+  connectionLimit: 10
+}));
 
 /**
  * @method: query
